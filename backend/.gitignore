@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+zyra_venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment Variables
+.env
+
+# Byte-compiled
+*.db
+*.sqlite3
+
+# Alembic
+alembic/__pycache__/
+
+# Logs
+*.log
+
+# Build
+dist/
+build/
