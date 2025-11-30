@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ARRAY, DOUBLE_PRECISION
 from app.db import Base
-from pgvector.sqlalchemy import Vector
+from pgvector.sqlalchemy import Vector # pyright: ignore[reportMissingImports]
 
 class Embedding(Base):
     __tablename__ = "chunk_embeddings"
