@@ -10,6 +10,7 @@ class Uploader(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(150), unique=True, nullable=True)
     user_type = Column(String(20))  # admin / teacher / student
+    phone = Column(String(20), nullable=True)
 
     documents = relationship(
         "Document",

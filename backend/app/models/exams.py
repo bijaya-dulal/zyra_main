@@ -10,6 +10,11 @@ class Exam(Base):
     name = Column(String, nullable=False)
     board = Column(String, nullable=False)
     starting_date = Column(Date)
+    description = Column(Text, nullable=True)
 
     # 🔥 One exam has many subjects
-    subjects = relationship("Subject", back_populates="exam")
+    subjects = relationship(
+        "Subject",
+        back_populates="exam",
+        cascade="all, delete-orphan"  # deleting exam deletes all subjects
+    )
