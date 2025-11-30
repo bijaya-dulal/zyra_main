@@ -16,5 +16,6 @@ class Exam(Base):
     subjects = relationship(
         "Subject",
         back_populates="exam",
-        cascade="all, delete-orphan"  # deleting exam deletes all subjects
-    )
+        cascade="all"  # Keep 'all' for saving/deleting related subjects in a session, but remove 'delete-orphan'
+)
+    

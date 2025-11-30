@@ -13,7 +13,7 @@ class Embedding(Base):
     # FK → delete embedding if chunk is deleted
     chunk_id = Column(
         String,
-        ForeignKey("chunks.id", ondelete="CASCADE"),
+        ForeignKey("document_chunks.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,       # 1-to-1 relationship
         index=True

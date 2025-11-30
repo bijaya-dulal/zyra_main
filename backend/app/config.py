@@ -23,10 +23,10 @@ class Settings(BaseSettings):
     # -----------------------------
     # DATABASE CONFIG
     # -----------------------------
-    DATABASE_URL: str
+    DATABASE_URL: str = "postgresql+psycopg2://postgres:bijaya201542@localhost/zyra_rag"
 
     # For pgvector, pinecone, chroma, etc.
-    VECTOR_DB_URL: str | None = None  
+    VECTOR_DB_URL: str = "postgresql+psycopg2://postgres:bijaya201542@localhost/zyra_rag"  
 
     # -----------------------------
     # LLM API KEYS

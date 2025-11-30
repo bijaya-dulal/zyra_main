@@ -17,11 +17,11 @@ class Subject(Base):
     theory_mark = Column(Integer)
     practical_mark = Column(Integer)
 
-    exam_id = Column(String, ForeignKey("exams.id"), nullable=False)
+    exam_id = Column(String, ForeignKey("exams.id"), nullable=True)
 
     exam = relationship("Exam", back_populates="subjects")
     documents = relationship("Document", back_populates="subject", cascade="all, delete-orphan")
 
     __table_args__ = (
-        UniqueConstraint('name', 'class_name', 'exam_id'),
+        UniqueConstraint('name', 'grade_name', 'exam_id'),
     )

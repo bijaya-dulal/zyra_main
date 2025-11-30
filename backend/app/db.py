@@ -26,7 +26,8 @@ DATABASE_URL = settings.DATABASE_URL  # Loaded from .env via Settings class
 # echo=True shows SQL queries in terminal (enable during debugging)
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True,  # Ensures connections are alive
+    pool_pre_ping=True,
+      echo=True,  # Ensures connections are alive
 )
 
 
