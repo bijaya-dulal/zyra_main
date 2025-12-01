@@ -24,6 +24,9 @@ zyra_venv/
 
 # Alembic
 alembic/__pycache__/
+migrations/__pycache__/
+
+
 
 # Logs
 *.log
@@ -31,3 +34,7 @@ alembic/__pycache__/
 # Build
 dist/
 build/
+
+
+#others
+test.py
