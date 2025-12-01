@@ -9,15 +9,26 @@ This file handles:
 5. Providing the init_db() function to create all tables.
 """
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 from app.core.config import settings # Assuming core.config is now app.config
+
+####importing the modls files
+from app.models.base_model import Base
+import app.models.subjects  # Import Subject model file
+import app.models.exams
+import app.models.documents
+import app.models.uploaders
+import app.models.chunks
+import app.models.embeddings
+import app.models.exams
+
 
 # -----------------------------
 # BASE CLASS FOR MODELS
 # -----------------------------
 # This is the base class that all your SQLAlchemy models (Subject, Document, etc.)
 # will inherit from. It registers the models with the database metadata.
-Base = declarative_base()
+
 
 
 # -----------------------------

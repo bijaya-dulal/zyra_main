@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ARRAY, DOUBLE_PRECISION
 from app.db import Base
-from pgvector.sqlalchemy import Vector # pyright: ignore[reportMissingImports]
+#from pgvector.sqlalchemy import Vector # pyright: ignore[reportMissingImports]
 
 class Embedding(Base):
     __tablename__ = "chunk_embeddings"
@@ -20,7 +20,7 @@ class Embedding(Base):
     )
 
     # Vector of floats (1536 dim for OpenAI / LLama embeddings)
-    embedding_vector = Column(Vector(1536), nullable=False)
+    #embedding_vector = Column(Vector(1536), nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
