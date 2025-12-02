@@ -22,7 +22,7 @@ from app.db import init_db
 
 # Application Routers
 # Assuming all your routers are correctly defined in app/routers/v1
-from app.routers.v1 import subjects, documents, chunks, embeddings, rag, exams
+from app.routers.v1 import subjects, documents, chunks, embeddings, rag, exams, uploaders
 
 # --- Helper Function to Create the HTML Content ---
 def generate_welcome_html(status_data: dict) -> str:
@@ -126,6 +126,7 @@ def create_application() -> FastAPI:
     app.include_router(embeddings.router, prefix="/api/v1/embeddings", tags=["Embeddings"])
     app.include_router(rag.router, prefix="/api/v1/rag", tags=["RAG"])
     app.include_router(exams.router, prefix="/api/v1/exams", tags=["Exams"])
+    app.include_router(uploaders.router, prefix="/api/v1/uploaders")
 
 
     return app
