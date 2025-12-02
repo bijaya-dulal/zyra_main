@@ -21,7 +21,7 @@ from app.db import init_db
 
 # Application Routers
 # Assuming all your routers are correctly defined in app/routers/v1
-from app.routers.v1 import subjects, documents, chunks, embeddings, rag
+from app.routers.v1 import subjects, documents, chunks, embeddings, rag, exams
 
 
 def create_application() -> FastAPI:
@@ -56,6 +56,8 @@ def create_application() -> FastAPI:
     app.include_router(chunks.router, prefix="/api/v1/chunks", tags=["Chunks"])
     app.include_router(embeddings.router, prefix="/api/v1/embeddings", tags=["Embeddings"])
     app.include_router(rag.router, prefix="/api/v1/rag", tags=["RAG"])
+    app.include_router(exams.router, prefix="/api/v1/exams", tags=["Exams"])
+
 
     return app
 
