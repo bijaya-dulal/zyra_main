@@ -6,6 +6,10 @@ from uuid import uuid4
 from app.models.documents import Document
 from app.schemas.document_schemas import DocumentCreate, DocumentUpdate
 
+from app.services.extractor.pipeline import ExtractionPipeline
+from app.utils.file_storage import LocalStorage
+from fastapi.concurrency import run_in_threadpool
+
 
 class AsyncDocumentService:
     """
@@ -85,3 +89,22 @@ class AsyncDocumentService:
         await db.delete(document)
         await db.commit()
         return True
+    
+    #this is for the document processing(i.e:extract the text of the document)
+     
+@staticmethod
+async def process_document(file_bytes: bytes, file_name: str, subject_name: str):
+
+    # 1. Save file (sync)
+    saved_path = await run_in_threadpool(
+        LocalStorage.save_file, file_name, file_bytes
+    )
+
+    # 2. Extract content (sync + heavy)
+    extractor = ExtractionPipeline()
+
+    result = await run_in_threadpool(
+        extractor.extract, saved_path, subject_name
+    )
+
+    return result
