@@ -59,7 +59,7 @@ class OverlapHandler:
                 # Create updated chunk
                 result.append(Chunk(
                     content=content,
-                    #chunk_type=chunk.chunk_type,
+                    chunk_type=chunk.chunk_type,
                     metadata=metadata,
                     start_index=chunk.start_index,
                     end_index=chunk.end_index,
