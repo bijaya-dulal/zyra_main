@@ -38,7 +38,7 @@ class OverlapHandler:
                 if i > 0:
                     prev_chunk = chunks[i - 1]
                     overlap_text = self._extract_overlap(
-                        prev_chunk.content,
+                        prev_chunk.content, # type: ignore
                         from_end=True
                     )
                     if overlap_text:
@@ -49,7 +49,7 @@ class OverlapHandler:
                 if i < len(chunks) - 1:
                     next_chunk = chunks[i + 1]
                     overlap_text = self._extract_overlap(
-                        next_chunk.content,
+                        next_chunk.content, # type: ignore
                         from_end=False
                     )
                     if overlap_text:
@@ -63,7 +63,7 @@ class OverlapHandler:
                     metadata=metadata,
                     start_index=chunk.start_index,
                     end_index=chunk.end_index,
-                    token_count=rough_token_count(content)
+                    token_count=rough_token_count(content) # type: ignore
                 ))
 
             return result
