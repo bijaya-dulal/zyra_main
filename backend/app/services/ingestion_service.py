@@ -1,3 +1,13 @@
+#######################################    
+# Gets the data into the system. Handles extraction, chunking, and embedding.   
+# 
+#   This service orchestrates the full ingestion pipeline:
+#   1. Extracts content from a file
+#   2. Chunks the content into manageable pieces
+#   3. Embeds each chunk for vector storage and retrieval   
+
+#######################################
+
 import logging
 from typing import List, Dict, Any
 from app.services.extractor.pipeline import ExtractionPipeline
@@ -15,7 +25,7 @@ class IngestionService:
 
     def __init__(self):
         self.extractor = ExtractionPipeline()
-        self.chunker = AcademicChunker(max_chunk_size=1000, overlap=200)
+        self.chunker = AcademicChunker(max_chunk_size=1000)
         self.embedding_service = EmbeddingService()
 
     async def process_file(self, file_path: str, subject: str, document_id: str) -> List[ChunkBase]:
