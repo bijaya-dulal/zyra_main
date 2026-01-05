@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 from app.db import Base
 
 # ✅ CORRECTION 1: Uncomment this import
-from pgvector.sqlalchemy import Vector 
+from pgvector.sqlalchemy import Vector  # type: ignore
 
 class Embedding(Base):
     __tablename__ = "chunk_embeddings"
