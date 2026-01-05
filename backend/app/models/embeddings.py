@@ -1,9 +1,11 @@
 from sqlalchemy import Column, String, ForeignKey, DateTime, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import ARRAY, DOUBLE_PRECISION
+# from sqlalchemy.dialects.postgresql import ARRAY, DOUBLE_PRECISION # Not currently used, can remove if unused
 from app.db import Base
-#from pgvector.sqlalchemy import Vector # pyright: ignore[reportMissingImports]
+
+# ✅ CORRECTION 1: Uncomment this import
+from pgvector.sqlalchemy import Vector 
 
 class Embedding(Base):
     __tablename__ = "chunk_embeddings"
@@ -19,11 +21,11 @@ class Embedding(Base):
         index=True
     )
 
-    # Vector of floats (768 dim for all-mpnet-v2)
-    #embedding_vector = Column(Vector(768), nullable=False)
+    # ✅ CORRECTION 2: Uncomment this column
+    # This must be named 'embedding_vector' to match your backend logic
+    embedding_vector = Column(Vector(768), nullable=False)
 
-
-   # Store model info for tracking
+    # Store model info for tracking
     model_name = Column(String, nullable=True)  # e.g., "all-mpnet-base-v2"
     dimensions = Column(Integer, nullable=True)  # e.g., 768
 
@@ -31,4 +33,3 @@ class Embedding(Base):
 
     # Relationship back to Chunk
     chunk = relationship("Chunk", back_populates="embedding")
-
