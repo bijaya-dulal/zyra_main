@@ -2,6 +2,7 @@ import logging
 import json
 import httpx
 import asyncio
+import os
 from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
    
@@ -18,39 +19,65 @@ class RAGService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+        # Initialize sub-services
         self.embedding_service = EmbeddingService()
         self.search_service = SearchService(db, self.embedding_service)
+        
         # Production API Configuration
-        self.api_key = "" # Environment injects this at runtime
-        self.model_name = "gemini-2.5-flash-preview-09-2025"
+        self.api_key = os.environ.get("GEMINI_API_KEY")
+        if not self.api_key:
+            logger.warning("⚠️ GEMINI_API_KEY is missing! RAG Service will fail.")
+
+        # Use the stable alias or the specific preview if needed
+        self.model_name = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash") 
         self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
 
-    async def _call_llm_with_retry(self, system_prompt: str, user_query: str, retries: int = 5) -> str:
+    async def _call_llm_with_retry(self, system_prompt: str, user_query: str, retries: int = 3) -> str:
         """Calls Gemini API with exponential backoff for production stability."""
+        
+        # Proper Gemini 1.5/2.5 Payload Structure
         payload = {
             "contents": [
                 {
                     "role": "user",
-                    "parts": [{"text": f"{system_prompt}\n\nUser Question: {user_query}"}]
+                    "parts": [{"text": f"Context:\n{system_prompt}\n\nQuestion:\n{user_query}"}]
                 }
             ],
+            # System Instructions are supported in v1beta for Flash models
             "systemInstruction": {
-                "parts": [{"text": "You are ZYRA, the first AI Teacher in Nepal. Be helpful, academic, and precise."}]
+                "parts": [{"text": "You are ZYRA, the first AI Teacher in Nepal. Be helpful, academic, and precise. Use LaTeX for math."}]
+            },
+            "generationConfig": {
+                "temperature": 0.3,  # Lower temperature for more factual academic answers
+                "maxOutputTokens": 1024
             }
         }
 
         async with httpx.AsyncClient() as client:
             for i in range(retries):
                 try:
-                    response = await client.post(self.base_url, json=payload, timeout=30.0)
-                    response.raise_for_status()
+                    response = await client.post(self.base_url, json=payload, timeout=45.0)
+                    
+                    if response.status_code != 200:
+                        logger.error(f"Gemini API Error {response.status_code}: {response.text}")
+                        response.raise_for_status()
+
                     result = response.json()
-                    return result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "I couldn't generate an answer.")
+                    
+                    # specific safe extraction for Gemini response structure
+                    try:
+                        return result["candidates"][0]["content"]["parts"][0]["text"]
+                    except (KeyError, IndexError) as e:
+                        logger.error(f"Unexpected JSON structure: {result}")
+                        return "I processed the documents but couldn't generate a clear answer."
+
                 except Exception as e:
                     if i == retries - 1:
-                        logger.error(f"LLM Final Failure: {e}")
+                        logger.error(f"LLM Final Failure after {retries} attempts: {e}")
                         return "I'm having trouble connecting to my brain right now. Please try again in a moment."
+                    
                     wait_time = (2 ** i)
+                    logger.info(f"LLM retry {i+1}/{retries} in {wait_time}s...")
                     await asyncio.sleep(wait_time)
 
     async def answer_question(
@@ -66,7 +93,6 @@ class RAGService:
         logger.info(f"RAG Query received: {query}")
 
         # 1. SEARCH & RANK
-        # SearchService handles vector similarity and returns ranked (Chunk, Score) tuples
         search_results = await self.search_service.search(
             query=query, 
             top_k=top_k, 
@@ -84,11 +110,14 @@ class RAGService:
         context_text = ""
         sources = []
         for i, (chunk, score) in enumerate(search_results):
-            context_text += f"\n[Source {i+1}]:\n{chunk.content}\n"
+            # Access attributes safely
+            content = getattr(chunk, 'content', str(chunk))
+            
+            context_text += f"\n[Source {i+1}]:\n{content}\n"
             sources.append({
                 "source_index": i + 1,
-                "chunk_id": chunk.id,
-                "doc_id": chunk.document_id,
+                "chunk_id": getattr(chunk, 'id', 'unknown'),
+                "doc_id": getattr(chunk, 'document_id', 'unknown'),
                 "relevance_score": round(float(score), 4)
             })
 

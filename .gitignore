@@ -37,7 +37,9 @@ build/
 
 
 #others
+embedding.py
 test.py
 test.pdf
 *.
 *.
+db_embedding_test.py

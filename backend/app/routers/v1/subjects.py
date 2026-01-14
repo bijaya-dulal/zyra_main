@@ -1,68 +1,34 @@
-from fastapi import APIRouter, Depends, Query, status, Response
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
 from app.db import get_db
-from app.schemas.subject_schemas import (
-    SubjectCreate,
-    SubjectUpdate,
-    SubjectResponse
-)
-from app.services.subject_service import AsyncSubjectService 
-
+from app.services.subject_service import AsyncSubjectService
+from app.schemas.subject_schemas import SubjectCreate, SubjectUpdate, SubjectResponse
 
 router = APIRouter(tags=["Subjects"])
 
-
-# -----------------------
-# LIST SUBJECTS
-# -----------------------
-@router.get("/", response_model=list[SubjectResponse])
+@router.get("/", response_model=List[SubjectResponse])
 async def list_subjects(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db)
+    limit: int = Query(20, ge=1),
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
 ):
-    subjects = await AsyncSubjectService.list_subjects(db, limit, offset)
-    return subjects
-# -----------------------
-# GET SINGLE SUBJECT
-# -----------------------
-@router.get("/{subject_id}", response_model=SubjectResponse)
-def get_subject(subject_id: str, db: Session = Depends(get_db)):
-    return AsyncSubjectService.get_subject(db, subject_id)
+    return await AsyncSubjectService.list_subjects(db, limit, offset)
 
+@router.post("/", response_model=SubjectResponse, status_code=status.HTTP_201_CREATED)
+async def create_subject(data: SubjectCreate, db: AsyncSession = Depends(get_db)):
+    return await AsyncSubjectService.create_subject(db, data)
 
-# -----------------------
-# CREATE SUBJECT
-# -----------------------
-@router.post(
-    "/", 
-    response_model=SubjectResponse, 
-    status_code=status.HTTP_201_CREATED
-)
-def create_subject(data: SubjectCreate, db: Session = Depends(get_db)):
-    return AsyncSubjectService.create_subject(db, data)
-
-
-# -----------------------
-# UPDATE SUBJECT
-# -----------------------
 @router.patch("/{subject_id}", response_model=SubjectResponse)
-def update_subject(
-    subject_id: str,
-    data: SubjectUpdate,
-    db: Session = Depends(get_db),
+async def update_subject(
+    subject_id: str, 
+    data: SubjectUpdate, 
+    db: AsyncSession = Depends(get_db)
 ):
-    return AsyncSubjectService.update_subject(db, subject_id, data)
+    return await AsyncSubjectService.update_subject(db, subject_id, data)
 
-
-# -----------------------
-# DELETE SUBJECT
-# -----------------------
 @router.delete("/{subject_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_subject(subject_id: str, db: Session = Depends(get_db)):
-    AsyncSubjectService.delete_subject(db, subject_id)
-    return
-
-
-
+async def delete_subject(subject_id: str, db: AsyncSession = Depends(get_db)):
+    await AsyncSubjectService.delete_subject(db, subject_id)
+    return None

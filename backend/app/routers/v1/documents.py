@@ -1,52 +1,38 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional
 
 from app.db import get_db
 from app.services.document_service import AsyncDocumentService
-from app.schemas.document_schemas import (
-    DocumentCreate,
-    DocumentUpdate,
-    DocumentResponse
-)
+from app.schemas.document_schemas import DocumentCreate, DocumentUpdate, DocumentResponse
 
-router = APIRouter(prefix="", tags=["Documents"])
+router = APIRouter(tags=["Documents"])
 
-# Create
-@router.post("/", response_model=DocumentResponse)
-def create_doc(data: DocumentCreate, db: Session = Depends(get_db)):
-    return AsyncDocumentService.create_document(db, data)
-
-# List documents
-@router.get("/", response_model=list[DocumentResponse])
-async def list_docs(
-    subject_id: str = None,
-    doc_type: str = None,
-    status: str = None,
-    language: str = None,
-    db: Session = Depends(get_db)
+@router.get("/", response_model=List[DocumentResponse])
+async def list_documents(
+    subject_id: Optional[str] = None,
+    doc_type: Optional[str] = None,
+    limit: int = Query(20, ge=1),
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
 ):
-    return await AsyncDocumentService.list_documents(db, subject_id, doc_type, status, language)
+    return await AsyncDocumentService.list_documents(db, subject_id, doc_type, limit, offset)
 
-# Get one
 @router.get("/{doc_id}", response_model=DocumentResponse)
-def get_doc(doc_id: str, db: Session = Depends(get_db)):
-    doc = AsyncDocumentService.get_document(db, doc_id)
+async def get_document(doc_id: str, db: AsyncSession = Depends(get_db)):
+    doc = await AsyncDocumentService.get_document(db, doc_id)
     if not doc:
-        raise HTTPException(404, "Document not found")
+        raise HTTPException(status_code=404, detail="Document not found")
     return doc
 
-# Update
-@router.put("/{doc_id}", response_model=DocumentResponse)
-def update_doc(doc_id: str, data: DocumentUpdate, db: Session = Depends(get_db)):
-    doc = AsyncDocumentService.update_document(db, doc_id, data)
-    if not doc:
-        raise HTTPException(404, "Document not found")
-    return doc
+@router.post("/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+async def create_document(data: DocumentCreate, db: AsyncSession = Depends(get_db)):
+    # Note: This creates the METADATA. Use /ingest/process to upload the actual file content.
+    return await AsyncDocumentService.create_document(db, data)
 
-# Delete
-@router.delete("/{doc_id}")
-def remove_doc(doc_id: str, db: Session = Depends(get_db)):
-    deleted = AsyncDocumentService.delete_document(db, doc_id)
-    if not deleted:
-        raise HTTPException(404, "Document not found")
-    return {"message": "Document deleted successfully"}
+@router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_document(doc_id: str, db: AsyncSession = Depends(get_db)):
+    success = await AsyncDocumentService.delete_document(db, doc_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return None

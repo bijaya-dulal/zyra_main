@@ -1,49 +1,38 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Optional
-from datetime import date
 
-
-# -----------------------
-# Base Schema
-# -----------------------
+# Base Schema (Shared properties)
 class SubjectBase(BaseModel):
-    name: str = Field(..., min_length=2, max_length=100)
-    class_name: str = Field(..., min_length=1)
-    course_name: str = Field(..., min_length=2)
+    name: str
+    grade_name: str            # ✅ FIXED: Was likely 'class_name' before
+    course_name: str
     description: Optional[str] = None
-    full_mark: Optional[int] = Field(None, ge=0)
-    pass_mark: Optional[int] = Field(None, ge=0)
-    theory_mark: Optional[int] = Field(None, ge=0)
-    practical_mark: Optional[int] = Field(None, ge=0)
-    exam_id: str
+    
+    full_mark: Optional[int] = 100
+    pass_mark: Optional[int] = 40
+    theory_mark: Optional[int] = 75
+    practical_mark: Optional[int] = 25
 
-
-# -----------------------
-# Create Schema
-# -----------------------
+# Schema for CREATING a subject
 class SubjectCreate(SubjectBase):
-    pass
+    # id: Optional[str] = None
+    
+    # ✅ FIXED: Made Optional to match DB 'nullable=True'
+    # This allows you to create a Subject without an Exam first
+    exam_id: Optional[str] = None 
 
-
-# -----------------------
-# Update Schema
-# -----------------------
+# Schema for UPDATING
 class SubjectUpdate(BaseModel):
     name: Optional[str] = None
-    class_name: Optional[str] = None
+    grade_name: Optional[str] = None
     course_name: Optional[str] = None
     description: Optional[str] = None
-    full_mark: Optional[int] = Field(None, ge=0)
-    pass_mark: Optional[int] = Field(None, ge=0)
-    theory_mark: Optional[int] = Field(None, ge=0)
-    practical_mark: Optional[int] = Field(None, ge=0)
+    exam_id: Optional[str] = None
 
-
-# -----------------------
-# Response Schema
-# -----------------------
+# Schema for READING (Response)
 class SubjectResponse(SubjectBase):
     id: str
+    exam_id: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
