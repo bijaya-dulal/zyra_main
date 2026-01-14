@@ -24,3 +24,14 @@ async def create_exam(data: ExamCreate, db: AsyncSession = Depends(get_db)):
 async def delete_exam(exam_id: str, db: AsyncSession = Depends(get_db)):
     await AsyncExamService.delete_exam(db, exam_id)
     return None
+
+@router.patch("/{exam_id}", response_model=ExamResponse)
+async def update_exam(
+    exam_id: str, 
+    data: ExamUpdate, 
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update exam details (e.g., change the starting_date for next year).
+    """
+    return await AsyncExamService.update_exam(db, exam_id, data)
