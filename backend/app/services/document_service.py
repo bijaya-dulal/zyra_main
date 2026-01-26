@@ -10,7 +10,7 @@ from app.models.chunks import Chunk
 from app.models.embeddings import Embedding
 from app.schemas.document_schemas import DocumentCreate, DocumentUpdate
 from app.services.ingestion_service import IngestionService
-from app.models.uploaders import Uploader # Make sure to import this!
+from app.models.users import User # Make sure to import this!
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class AsyncDocumentService:
         
         if not final_uploader_id:
             # SQL: SELECT id FROM uploaders WHERE user_type = 'admin' LIMIT 1
-            stmt = select(Uploader.id).where(Uploader.user_type == "admin").limit(1)
+            stmt = select(User.id).where(User.user_type == "admin").limit(1)
             result = await db.execute(stmt)
             admin_id = result.scalar_one_or_none()
             

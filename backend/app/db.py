@@ -17,7 +17,7 @@ from app.models.base_model import Base
 import app.models.subjects  # Import Subject model file
 import app.models.exams
 import app.models.documents
-import app.models.uploaders
+import app.models.users
 import app.models.chunks
 import app.models.embeddings
 import app.models.exams

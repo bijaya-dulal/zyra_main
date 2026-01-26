@@ -1,67 +1,54 @@
-# app/config.py
-"""
-Settings / Environment Manager
--------------------------------
-This file loads all environment variables required by the project.
-
-It manages:
-- DATABASE_URL
-- VECTOR_DB_URL
-- API keys (OpenAI, HuggingFace, etc.)
-- Any other config values
-
-Pydantic BaseSettings automatically reads from:
-- .env file
-- OS environment variables
-"""
-
+import os
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
-
 class Settings(BaseSettings):
-   
     # PROJECT CONFIG
-
-    # New Setting: Name of the Project
     PROJECT_NAME: str = "zyra_rag_System"
 
     # -----------------------------
     # DATABASE CONFIG
     # -----------------------------
-    # Required setting: will load from environment variable or .env
-    DATABASE_URL: str = "DATABASE_URL=postgresql+asyncpg://bijaya:bijaya201542@localhost:5432/zyra_rag"
+    # FIX 1: Removed "DATABASE_URL=" prefix. 
+    # SQLAlchemy needs just the URL, not the key name.
+    DATABASE_URL: str = "postgresql+asyncpg://bijaya:bijaya201542@localhost:5432/zyra_rag"
     
-    
-    # Optional setting, falls back to the main DB if not set
     VECTOR_DB_URL: str | None = None  
 
     # -----------------------------
-    # LLM & EMBEDDING CONFIG
+    # OAuth configuration
+    # -----------------------------
+    # FIX 2: Removed os.getenv(). 
+    # Pydantic automatically looks for "SECRET_KEY" in your .env file.
+    # If you use os.getenv, it runs BEFORE Pydantic loads the .env file, often resulting in empty values.
+    SECRET_KEY: str = "super_secret_random_string_here" 
+    
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
 
-    # New Setting: Default embedding model name
+    # FIX 3: Removed os.getenv(). Pydantic will read these from .env automatically.
+    # If not found in .env, it uses these strings as defaults.
+    GOOGLE_CLIENT_ID: str 
+    GOOGLE_CLIENT_SECRET: str 
+    
+    # FIX 4: Changed localhost to 127.0.0.1 to match your previous Google Auth Fix
+    GOOGLE_REDIRECT_URI: str = "http://127.0.0.1:8000/api/v1/auth/google/callback"
+
+    # -----------------------------
+    # LLM & EMBEDDING CONFIG
     EMBEDDING_MODEL: str = "text-embedding-3-small"
     
-    # Existing Setting: LLM API Keys
     OPENAI_API_KEY: str | None = None
     HUGGINGFACE_API_KEY: str | None = None
 
-    # -----------------------------
-    # ENVIRONMENT MODE/production mode
+    ENV: str = "development"
 
-    ENV: str = "development"   #this should be chaged to the production after go tho production for the production phase
-
-
+    # This is the line that makes the magic happen
     class Config:
-        env_file = ".env"  # Loads variables from .env
+        env_file = ".env"
 
-
-# Cached so it's loaded only once for performance
 @lru_cache()
 def get_settings():
-    """Initializes and returns a cached Settings object."""
     return Settings()
 
-
-# Final settings object used throughout the application
 settings = get_settings()

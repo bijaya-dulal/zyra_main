@@ -58,3 +58,29 @@ async def ask_zyra(
             status_code=500, 
             detail=f"An error occurred while generating the answer: {str(e)}"
         )
+    
+
+    #update for the oauth 
+    from fastapi import APIRouter, Depends
+from app.routers.v1 import deps # Import the gatekeeper
+from app.models.users import User
+from app.schemas.user_schemas import UserOut
+
+router = APIRouter()
+
+@router.post("/ask")
+async def ask_question(
+    question: str, 
+    # THIS LINE IS THE MAGIC:
+    # It forces the user to be logged in. 
+    # If they are, you get the 'current_user' object.
+    current_user: User = Depends(deps.get_current_user) 
+):
+    print(f"User {current_user.email} (Role: {current_user.role}) is asking: {question}")
+    
+    # ... Your RAG Logic Here ...
+    
+    return {
+        "answer": "This answer is protected. Only logged-in users see this.",
+        "user": current_user.email
+    }

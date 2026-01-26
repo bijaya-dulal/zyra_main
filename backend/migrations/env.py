@@ -28,7 +28,7 @@ if config.config_file_name is not None:
 # ... etc.
 #this is edit my bijaya_dulal
 from app.db import Base
-from app.models import uploaders, documents, subjects, exams, chunks, embeddings
+from app.models import users, documents, subjects, exams, chunks, embeddings
 target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:

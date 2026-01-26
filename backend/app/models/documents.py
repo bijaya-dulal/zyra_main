@@ -14,7 +14,7 @@ class Document(Base):
     uri = Column(Text, nullable=False)
     language = Column(String(10), default="en", index=True)
 
-    uploader_id = Column(String, ForeignKey("uploaders.id", ondelete="SET NULL"))
+    uploader_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"))
     subject_id = Column(String, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False, index=True)
 
     tags = Column(ARRAY(Text))
@@ -25,6 +25,6 @@ class Document(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    uploader = relationship("Uploader", back_populates="documents")
+    uploader = relationship("User", back_populates="documents")
     subject = relationship("Subject", back_populates="documents")
     chunks = relationship("Chunk", back_populates="document", cascade="all, delete-orphan")

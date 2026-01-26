@@ -20,9 +20,11 @@ from app.core.config import settings
 # Assuming your db init function is in a file named 'db.py' or 'app/db.py'
 from app.db import init_db 
 
+from starlette.middleware.sessions import SessionMiddleware
+
 # Application Routers
 # Assuming all your routers are correctly defined in app/routers/v1
-from app.routers.v1 import subjects, documents, chunks, embeddings, rag, exams, uploaders, ingestion
+from app.routers.v1 import subjects, documents, chunks, embeddings, rag, exams, ingestion, users, auth
 
 # --- Helper Function to Create the HTML Content ---
 def generate_welcome_html(status_data: dict) -> str:
@@ -126,8 +128,9 @@ def create_application() -> FastAPI:
     app.include_router(embeddings.router, prefix="/api/v1/embeddings", tags=["Embeddings"])
     app.include_router(rag.router, prefix="/api/v1/rag", tags=["RAG"])
     app.include_router(exams.router, prefix="/api/v1/exams", tags=["Exams"])
-    app.include_router(uploaders.router, prefix="/api/v1/uploaders")
+    app.include_router(users.router, prefix="/api/v1/uploaders")
     app.include_router(ingestion.router, prefix="/api/v1/ingestion")
+    app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 
 
     return app
@@ -170,6 +173,12 @@ async def startup_event():
     print("Database Initialization Complete.")
 
 
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key=settings.SECRET_KEY,
+    https_only=False,
+    same_site="lax"
+)
 # -----------------------------
 # Unused Section: Runs the server
 # -----------------------------
